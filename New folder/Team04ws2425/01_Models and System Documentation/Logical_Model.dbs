@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="GLOBAL_DATA_MODEL" database="LogicalDesign" id="LogicalDesign-55b" >
+	<comment><![CDATA[V0.1]]></comment>
+	<schema name="INSTANCE" catalogname="GLOBAL_DATA_MODEL" >
+		<table name="course" prior="class" >
+			<comment><![CDATA[A class that is held by a teacher in a specific semester (such as "WS24/25").]]></comment>
+			<column name="course start" prior="semester start" type="VARCHAR" length="10" jt="12" mandatory="y" >
+				<comment><![CDATA[The semester in which a class starts.
+E.g. "WS24/25"]]></comment>
+			</column>
+			<column name="subject" type="VARCHAR" length="15" jt="12" mandatory="y" >
+				<comment><![CDATA[The subject which is taught in this course.
+E.g. "Information Systems"]]></comment>
+			</column>
+			<column name="teacher" prior="teacher id" type="VARCHAR" length="15" jt="12" mandatory="y" >
+				<comment><![CDATA[The teacher (id) teaching this course.]]></comment>
+			</column>
+			<column name="actual stupo hours" type="INT" jt="4" >
+				<comment><![CDATA[The actual hours for this subject according to the StuPo.
+E.g. "2"]]></comment>
+			</column>
+			<column name="actual schedule hours" type="INT" jt="4" >
+				<comment><![CDATA[The actual hours for this subject according to the schedule.
+E.g. "2"]]></comment>
+			</column>
+			<column name="credited teacher hours" prior="credited hours" type="INT" jt="4" >
+				<comment><![CDATA[The hours that will be credited to the teacher. This is part of the teacher's workload.
+E.g. "1"]]></comment>
+			</column>
+			<column name="remark" type="VARCHAR" length="255" jt="12" >
+				<comment><![CDATA[An optional remark about the course.]]></comment>
+			</column>
+			<index name="pk_course" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the course start and the subject number, which is a foreign key.]]></comment>
+				<column name="subject" />
+				<column name="course start" />
+			</index>
+			<fk name="fk_subject_teacher_subject" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="subject" type="Identifying" mandatory="y" cardinality="One" range_from="0" range_to="0" >
+				<fk_column name="subject" pk="subject number" />
+			</fk>
+			<fk name="fk_subject_teacher_teacher" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="teacher" type="NonIdentifying" mandatory="y" cardinality="ZeroMore" range_from="0" range_to="0" >
+				<fk_column name="teacher" pk="id" />
+			</fk>
+		</table>
+		<table name="faculty" prior="Entity" >
+			<comment><![CDATA[An academic unit that specializes in a particular field and contains related subjects]]></comment>
+			<column name="abbreviation" prior="faculty abbreviation" type="VARCHAR" length="5" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying abbreviation for the faculty.
+E.g. "IT"]]></comment>
+			</column>
+			<column name="name" type="VARCHAR" length="100" jt="12" mandatory="y" >
+				<comment><![CDATA[The full name of the faculty.
+E.g. "Information Technology"]]></comment>
+			</column>
+			<index name="pk_faculty" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the faculty abbreviation.]]></comment>
+				<column name="abbreviation" />
+			</index>
+		</table>
+		<table name="function" prior="Entity" >
+			<comment><![CDATA[Responsibilities undertaken by a professor related to the management and organization of academic programs, faculty governance, and departmental operations.]]></comment>
+			<column name="function start" type="VARCHAR" length="10" jt="12" mandatory="y" >
+				<comment><![CDATA[The semester in which a function starts.
+E.g. "WS24/25"]]></comment>
+			</column>
+			<column name="professor" type="INT" jt="4" mandatory="y" >
+				<comment><![CDATA[The professor (id) which exercises this function.]]></comment>
+			</column>
+			<column name="name" type="VARCHAR" length="100" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the function.
+E.g. "Head of internship office"]]></comment>
+			</column>
+			<column name="load" type="INT" jt="4" mandatory="y" >
+				<comment><![CDATA[The hourly load of the function.
+E.g. "2"]]></comment>
+			</column>
+			<index name="pk_func_prof_name" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the function start, the professor and the name of the function.]]></comment>
+				<column name="function start" />
+				<column name="professor" />
+				<column name="name" />
+			</index>
+			<fk name="fk_function_professor" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="professor" type="Identifying" mandatory="y" cardinality="ZeroMore" range_from="0" range_to="0" >
+				<fk_column name="professor" pk="teacher id" />
+			</fk>
+		</table>
+		<table name="lecturer" prior="Entity" >
+			<comment><![CDATA[A contracted teacher, also known as "lecturer" in the project document.]]></comment>
+			<column name="teacher id" prior="id" type="VARCHAR" length="15" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the teacher.
+Foreign Key from the teacher table.]]></comment>
+			</column>
+			<column name="address" type="VARCHAR" length="100" jt="12" mandatory="y" >
+				<comment><![CDATA[Address of the lecturer.
+In order to be able to write to the lecturers.
+E.g. "Kanalstraße 33, Esslingen"]]></comment>
+			</column>
+			<index name="pk_lecturer" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the teacher id, which is also a foreign key.]]></comment>
+				<column name="teacher id" />
+			</index>
+			<fk name="fk_lecturer_teacher" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="teacher" type="NonIdentifying" mandatory="y" cardinality="One" range_from="0" range_to="0" >
+				<fk_column name="teacher id" pk="id" />
+			</fk>
+		</table>
+		<table name="major" prior="Entity" >
+			<comment><![CDATA[A degree program.]]></comment>
+			<column name="abbreviation" prior="abbreviati" type="VARCHAR" length="5" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying abbreviation for the major.
+E.g. "SWB"]]></comment>
+			</column>
+			<column name="name" type="VARCHAR" length="100" jt="12" mandatory="y" >
+				<comment><![CDATA[The full name for the major.
+E.g. "Software Engineering and Media Computing"]]></comment>
+			</column>
+			<column name="faculty" prior="faculty abbreviation" type="VARCHAR" length="5" jt="12" mandatory="y" >
+				<comment><![CDATA[The faculty a major belongs to.
+E.g. "IT" for "Software Engineering and Media Computing"]]></comment>
+			</column>
+			<index name="pk_major" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the major abbreviation.]]></comment>
+				<column name="abbreviation" />
+			</index>
+			<fk name="fk_major_faculty" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="faculty" type="NonIdentifying" mandatory="y" cardinality="OneMore" range_from="0" range_to="0" >
+				<fk_column name="faculty" pk="abbreviation" />
+			</fk>
+		</table>
+		<table name="professor" prior="Entity" >
+			<comment><![CDATA[A permanently employed academic who is responsible for teaching and research, also known as "professor" in the project document.]]></comment>
+			<column name="teacher id" prior="id" type="VARCHAR" length="15" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the professor.
+Foreign Key from the teacher table.]]></comment>
+			</column>
+			<column name="credit hour account" type="DECIMAL" jt="3" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+				<comment><![CDATA[Additional work beyond the 18 compulsory work hours  for a professor is credited to a credit hour account, less work is debited from this account.
+E.g. "2"]]></comment>
+			</column>
+			<index name="pk_professor" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the professor id, which is also a foreign key.]]></comment>
+				<column name="teacher id" />
+			</index>
+			<fk name="fk_professor_teacher" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="teacher" type="NonIdentifying" mandatory="y" cardinality="One" range_from="0" range_to="0" >
+				<fk_column name="teacher id" pk="id" />
+			</fk>
+		</table>
+		<table name="subject" prior="Entity" >
+			<comment><![CDATA[A specific subject listed in the curriculum of a major.]]></comment>
+			<column name="subject number" type="VARCHAR" length="15" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the subject.
+E.g. "R39.04995"]]></comment>
+			</column>
+			<column name="subject name" type="VARCHAR" length="100" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of a subject.
+E.g. "Information Systems"]]></comment>
+			</column>
+			<column name="subject type" type="CHAR" length="1" jt="1" mandatory="y" >
+				<defo><![CDATA['P']]></defo>
+				<comment><![CDATA[If the subject is an compulsory "P", elective "W" or supplementary "Z"
+E.g. "P" for "Information Systems"]]></comment>
+			</column>
+			<column name="planned stupo hours" type="INT" jt="4" mandatory="y" >
+				<comment><![CDATA[The planned hours for this subject according to the StuPo.
+E.g. "2"]]></comment>
+			</column>
+			<column name="planned schedule hours" type="INT" jt="4" mandatory="y" >
+				<comment><![CDATA[The planned hours for this subject according to the schedule.
+E.g. "2"]]></comment>
+			</column>
+			<column name="semester" type="INT" jt="4" >
+				<comment><![CDATA[The planned semester for this subject according to the curriculum.
+E.g. "6" for "Information Systems"]]></comment>
+			</column>
+			<column name="major" prior="abbreviati" type="VARCHAR" length="5" jt="12" >
+				<comment><![CDATA[The major to which this subject belongs to.
+E.g. "SWB"]]></comment>
+			</column>
+			<column name="faculty" prior="providing faculty" type="VARCHAR" length="5" jt="12" mandatory="y" >
+				<comment><![CDATA[The faculty of this subject.
+E.g. "IT"]]></comment>
+			</column>
+			<column name="remark" type="VARCHAR" length="255" jt="12" >
+				<comment><![CDATA[An optional remark about the subject.]]></comment>
+			</column>
+			<index name="pk_subject" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the subject number.]]></comment>
+				<column name="subject number" />
+			</index>
+			<fk name="fk_subject_faculty" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="faculty" type="NonIdentifying" mandatory="y" cardinality="OneMore" range_from="0" range_to="0" >
+				<fk_column name="faculty" pk="abbreviation" />
+			</fk>
+			<fk name="fk_subject_major" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="major" type="NonIdentifying" mandatory="y" cardinality="OneMore" range_from="0" range_to="0" >
+				<fk_column name="major" pk="abbreviation" />
+			</fk>
+		</table>
+		<table name="teacher" prior="Entity" >
+			<comment><![CDATA[A person teaching a course.]]></comment>
+			<column name="id" prior="teacher id" type="VARCHAR" length="15" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the teacher.]]></comment>
+			</column>
+			<column name="name" type="VARCHAR" length="100" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the teacher.
+E.g. "Steffen Schober"]]></comment>
+			</column>
+			<column name="faculty" prior="faculty abbreviation" type="VARCHAR" length="5" jt="12" mandatory="y" >
+				<comment><![CDATA[The faculty the teacher belongs to.
+E.g. "IT" for "Steffen Schober"]]></comment>
+			</column>
+			<column name="remark" type="VARCHAR" length="255" jt="12" >
+				<comment><![CDATA[An optional remark made by the teacher about themselves.]]></comment>
+			</column>
+			<index name="pk_teacher" unique="PRIMARY_KEY" >
+				<comment><![CDATA[Primary key consisting of the teacher id.]]></comment>
+				<column name="id" />
+			</index>
+			<fk name="fk_teacher_faculty" to_schema="GLOBAL_DATA_MODEL.INSTANCE" to_table="faculty" type="NonIdentifying" mandatory="y" cardinality="OneMore" range_from="0" range_to="0" >
+				<fk_column name="faculty" pk="abbreviation" />
+			</fk>
+		</table>
+	</schema>
+	<layout name="Global Data Model" id="Layout-190d" show_column_type="y" show_relation="columns" >
+		<comment><![CDATA[Default Layout]]></comment>
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="course" color="C1D8EE" x="374" y="561" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="faculty" color="C1D8EE" x="697" y="255" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="function" color="C1D8EE" x="51" y="255" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="lecturer" color="C1D8EE" x="527" y="51" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="major" color="C1D8EE" x="1020" y="255" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="professor" color="C1D8EE" x="221" y="51" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="subject" color="C1D8EE" x="816" y="544" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="teacher" color="C1D8EE" x="391" y="255" />
+	</layout>
+	<layout name="Lecturer Workload Planning View" id="Layout-21d4" show_relation="columns" >
+		<comment><![CDATA[When you calculate the lecturer workload. 
+A lecturer cannot perform any functions.]]></comment>
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="course" color="3986C1" x="51" y="272" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="lecturer" color="3986C1" x="289" y="51" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="teacher" color="3986C1" x="51" y="51" />
+	</layout>
+	<layout name="Professor Workload Planning View" id="Layout-661" show_relation="columns" >
+		<comment><![CDATA[When you calculate the professor workload. 
+The functions are included to be credited to the credit hour account / to reduce the load.]]></comment>
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="course" color="3986C1" x="289" y="255" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="function" color="3986C1" x="51" y="289" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="professor" color="3986C1" x="51" y="51" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="teacher" color="3986C1" x="374" y="51" />
+	</layout>
+	<layout name="Semester-Specific Course Planning View" id="Layout-45b" show_relation="columns" >
+		<comment><![CDATA[When you create the courses to be taught in one semester.]]></comment>
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="course" color="3986C1" x="272" y="51" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="faculty" color="3986C1" x="663" y="442" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="major" color="3986C1" x="935" y="51" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="subject" color="3986C1" x="595" y="51" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="teacher" color="3986C1" x="51" y="51" />
+	</layout>
+	<layout name="Subject Creation View" id="Layout-9e2" show_relation="columns" >
+		<comment><![CDATA[Subject Creation View]]></comment>
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="faculty" color="3986C1" x="459" y="187" />
+		<entity schema="GLOBAL_DATA_MODEL.INSTANCE" name="subject" color="3986C1" x="51" y="51" />
+	</layout>
+</project>

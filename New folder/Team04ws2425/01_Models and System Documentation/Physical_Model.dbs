@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="Db2" database="Db2" id="Db2-191c" >
+	<schema name="INSTANCE" >
+		<table name="COURSE" >
+			<comment><![CDATA[A class that is held by a teacher in a specific semester (such as "WS24/25").]]></comment>
+			<column name="SUBJECT" type="VARCHAR" length="15" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The subject (number) which is taught in this course. E.g. "R39.04995"]]></comment>
+			</column>
+			<column name="COURSE_START" type="VARCHAR" length="10" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The semester in which a class starts. E.g. "WS24/25"]]></comment>
+			</column>
+			<column name="TEACHER" type="VARCHAR" length="15" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The teacher (id) teaching this course.]]></comment>
+			</column>
+			<column name="ACTUAL_STUPO_HOURS" type="INTEGER" length="10" decimal="0" jt="4" >
+				<comment><![CDATA[The actual hours for this subject according to the StuPo. E.g. "2"]]></comment>
+			</column>
+			<column name="ACTUAL_SCHEDULE_HOURS" type="INTEGER" length="10" decimal="0" jt="4" >
+				<comment><![CDATA[The actual hours for this subject according to the schedule. E.g. "2"]]></comment>
+			</column>
+			<column name="CREDITED_TEACHER_HOURS" type="INTEGER" length="10" decimal="0" jt="4" >
+				<comment><![CDATA[The hours that will be credited to the teacher. This is part of the teacher's workload. E.g. "1"]]></comment>
+			</column>
+			<column name="REMARK" type="VARCHAR" length="255" decimal="0" jt="12" >
+				<comment><![CDATA[An optional remark about the course.]]></comment>
+			</column>
+			<index name="PK_COURSE" unique="PRIMARY_KEY" >
+				<column name="SUBJECT" />
+				<column name="COURSE_START" />
+				<column name="TEACHER" />
+			</index>
+			<constraint name="CNS_COURSE" >
+				<string><![CDATA[ ACTUAL_SCHEDULE_HOURS % 2 = 0 AND ACTUAL_SCHEDULE_HOURS >= 0 AND ACTUAL_SCHEDULE_HOURS <= 10 ]]></string>
+			</constraint>
+			<constraint name="CNS_COURSE_0" >
+				<string><![CDATA[ ACTUAL_STUPO_HOURS >= 0 AND ACTUAL_STUPO_HOURS <= 10 ]]></string>
+			</constraint>
+			<constraint name="CNS_COURSE_1" >
+				<string><![CDATA[ CREDITED_TEACHER_HOURS >= 0 AND CREDITED_TEACHER_HOURS <= 10 ]]></string>
+			</constraint>
+			<fk name="FK_SUBJECT_TEACHER_SUBJECT" to_schema="INSTANCE" to_table="SUBJECT" >
+				<fk_column name="SUBJECT" pk="SUBJECT_NUMBER" />
+			</fk>
+			<fk name="FK_SUBJECT_TEACHER_TEACHER" to_schema="INSTANCE" to_table="TEACHER" >
+				<fk_column name="TEACHER" pk="ID" />
+			</fk>
+		</table>
+		<table name="FACULTY" >
+			<comment><![CDATA[An academic unit that specializes in a particular field and contains related subjects]]></comment>
+			<column name="ABBREVIATION" type="VARCHAR" length="5" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying abbreviation for the faculty. E.g. "IT"]]></comment>
+			</column>
+			<column name="NAME" type="VARCHAR" length="100" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The full name of the faculty. E.g. "Information Technology"]]></comment>
+			</column>
+			<index name="PK_FACULTY" unique="PRIMARY_KEY" >
+				<column name="ABBREVIATION" />
+			</index>
+		</table>
+		<table name="FUNCTION_PROFESSOR" >
+			<comment><![CDATA[Responsibilities undertaken by a professor related to the management and organization of academic programs, faculty governance, and departmental operations.]]></comment>
+			<column name="FUNCTION_START" type="VARCHAR" length="10" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The semester in which a function starts. E.g. "WS24/25"]]></comment>
+			</column>
+			<column name="PROFESSOR" type="VARCHAR" length="15" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The professor (id) which exercises this function.]]></comment>
+			</column>
+			<column name="NAME" type="VARCHAR" length="100" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the function. E.g. "Head of internship office"]]></comment>
+			</column>
+			<column name="LOAD" type="INTEGER" length="10" decimal="0" jt="4" mandatory="y" >
+				<comment><![CDATA[The hourly load of the function. E.g. "2"]]></comment>
+			</column>
+			<index name="PK_FUNC_PROF_NAME" unique="PRIMARY_KEY" >
+				<column name="FUNCTION_START" />
+				<column name="PROFESSOR" />
+				<column name="NAME" />
+			</index>
+			<constraint name="CNS_FUNCTION" >
+				<string><![CDATA[ LOAD >= 0 AND LOAD <= 10 ]]></string>
+			</constraint>
+			<fk name="FK_FUNCTION_PROFESSOR" to_schema="INSTANCE" to_table="PROFESSOR" >
+				<fk_column name="PROFESSOR" pk="TEACHER_ID" />
+			</fk>
+		</table>
+		<table name="LECTURER" >
+			<comment><![CDATA[A contracted teacher, also known as "lecturer" in the project document.]]></comment>
+			<column name="TEACHER_ID" type="VARCHAR" length="15" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the teacher. Foreign Key from the teacher table.]]></comment>
+			</column>
+			<column name="ADDRESS" type="VARCHAR" length="100" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[Address of the lecturer. In order to be able to write to the lecturers. E.g. "Kanalstraße 33, Esslingen"]]></comment>
+			</column>
+			<column name="IS_ACTIVE" type="BOOLEAN" length="1" decimal="0" jt="16" mandatory="y" />
+			<index name="PK_LECTURER" unique="PRIMARY_KEY" >
+				<column name="TEACHER_ID" />
+			</index>
+			<fk name="FK_LECTURER_TEACHER" to_schema="INSTANCE" to_table="TEACHER" >
+				<fk_column name="TEACHER_ID" pk="ID" />
+			</fk>
+		</table>
+		<table name="MAJOR" >
+			<comment><![CDATA[A degree program.]]></comment>
+			<column name="ABBREVIATION" type="VARCHAR" length="5" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying abbreviation for the major. E.g. "SWB"]]></comment>
+			</column>
+			<column name="NAME" type="VARCHAR" length="100" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The full name for the major. E.g. "Software Engineering and Media Computing"]]></comment>
+			</column>
+			<column name="FACULTY" type="VARCHAR" length="5" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The faculty a major belongs to. E.g. "IT" for "Software Engineering and Media Computing"]]></comment>
+			</column>
+			<index name="PK_MAJOR" unique="PRIMARY_KEY" >
+				<column name="ABBREVIATION" />
+			</index>
+			<fk name="FK_MAJOR_FACULTY" to_schema="INSTANCE" to_table="FACULTY" >
+				<fk_column name="FACULTY" pk="ABBREVIATION" />
+			</fk>
+		</table>
+		<table name="PROFESSOR" >
+			<comment><![CDATA[A permanently employed academic who is responsible for teaching and research, also known as "professor" in the project document.]]></comment>
+			<column name="TEACHER_ID" type="VARCHAR" length="15" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the professor. Foreign Key from the teacher table.]]></comment>
+			</column>
+			<column name="CREDIT_HOUR_ACCOUNT" type="DECIMAL" length="5" decimal="0" jt="3" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+				<comment><![CDATA[Additional work beyond the 18 compulsory work hours  for a professor is credited to a credit hour account, less work is debited from this account. E.g. "2"]]></comment>
+			</column>
+			<column name="IS_ACTIVE" type="BOOLEAN" length="1" decimal="0" jt="16" mandatory="y" />
+			<index name="PK_PROFESSOR" unique="PRIMARY_KEY" >
+				<column name="TEACHER_ID" />
+			</index>
+			<fk name="FK_PROFESSOR_TEACHER" to_schema="INSTANCE" to_table="TEACHER" >
+				<fk_column name="TEACHER_ID" pk="ID" />
+			</fk>
+		</table>
+		<table name="SEARCH_CRITERIA" >
+			<comment><![CDATA[A table necessary for user views.]]></comment>
+			<column name="SEMESTER_START" type="VARCHAR" length="10" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The semester for which the data is shown. E.g. "WS24/25"]]></comment>
+			</column>
+			<column name="MAJOR" type="VARCHAR" length="5" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The major for which the data is shown. E.g. "SWB"]]></comment>
+			</column>
+			<column name="SEMESTER" type="INTEGER" length="10" decimal="0" jt="4" mandatory="y" >
+				<comment><![CDATA[The semester of a major for which the data is shown. E.g. "6" for "SWB"]]></comment>
+			</column>
+		</table>
+		<table name="SUBJECT" >
+			<comment><![CDATA[A specific subject listed in the curriculum of a major.]]></comment>
+			<column name="SUBJECT_NUMBER" type="VARCHAR" length="15" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the subject. E.g. "R39.04995"]]></comment>
+			</column>
+			<column name="SUBJECT_NAME" type="VARCHAR" length="100" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of a subject. E.g. "Information Systems"]]></comment>
+			</column>
+			<column name="SUBJECT_TYPE" type="CHAR" length="1" decimal="0" jt="1" mandatory="y" >
+				<defo><![CDATA['P']]></defo>
+				<comment><![CDATA[If the subject is an compulsory "P", elective "W" or supplementary "Z" E.g. "P" for "Information Systems"]]></comment>
+			</column>
+			<column name="PLANNED_STUPO_HOURS" type="INTEGER" length="10" decimal="0" jt="4" mandatory="y" >
+				<comment><![CDATA[The planned hours for this subject according to the StuPo. E.g. "2"]]></comment>
+			</column>
+			<column name="PLANNED_SCHEDULE_HOURS" type="INTEGER" length="10" decimal="0" jt="4" mandatory="y" >
+				<comment><![CDATA[The planned hours for this subject according to the schedule. E.g. "2"]]></comment>
+			</column>
+			<column name="SEMESTER" type="INTEGER" length="10" decimal="0" jt="4" >
+				<comment><![CDATA[The planned semester for this subject according to the curriculum. E.g. "6" for "Information Systems"]]></comment>
+			</column>
+			<column name="MAJOR" type="VARCHAR" length="5" decimal="0" jt="12" >
+				<comment><![CDATA[The major to which this subject belongs to. E.g. "SWB"]]></comment>
+			</column>
+			<column name="FACULTY" type="VARCHAR" length="5" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The faculty of this subject. E.g. "IT"]]></comment>
+			</column>
+			<column name="REMARK" type="VARCHAR" length="255" decimal="0" jt="12" >
+				<comment><![CDATA[An optional remark about the subject.]]></comment>
+			</column>
+			<index name="PK_SUBJECT" unique="PRIMARY_KEY" >
+				<column name="SUBJECT_NUMBER" />
+			</index>
+			<constraint name="CNS_SUBJECT" >
+				<string><![CDATA[ SEMESTER BETWEEN 1 AND 7 ]]></string>
+			</constraint>
+			<constraint name="PSCHH_SUBJECT" >
+				<string><![CDATA[ PLANNED_SCHEDULE_HOURS >= 0 AND PLANNED_SCHEDULE_HOURS <= 10 ]]></string>
+			</constraint>
+			<constraint name="PSTUH_SUBJECT" >
+				<string><![CDATA[ PLANNED_STUPO_HOURS >= 0 AND PLANNED_STUPO_HOURS <= 10 ]]></string>
+			</constraint>
+			<fk name="FK_SUBJECT_FACULTY" to_schema="INSTANCE" to_table="FACULTY" >
+				<fk_column name="FACULTY" pk="ABBREVIATION" />
+			</fk>
+			<fk name="FK_SUBJECT_MAJOR" to_schema="INSTANCE" to_table="MAJOR" >
+				<fk_column name="MAJOR" pk="ABBREVIATION" />
+			</fk>
+		</table>
+		<table name="TEACHER" >
+			<comment><![CDATA[A person teaching a course.]]></comment>
+			<column name="ID" type="VARCHAR" length="15" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[An identifying number for the teacher.]]></comment>
+			</column>
+			<column name="NAME" type="VARCHAR" length="100" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The name of the teacher. E.g. "Steffen Schober"]]></comment>
+			</column>
+			<column name="FACULTY" type="VARCHAR" length="5" decimal="0" jt="12" mandatory="y" >
+				<comment><![CDATA[The faculty the teacher belongs to. E.g. "IT" for "Steffen Schober"]]></comment>
+			</column>
+			<column name="REMARK" type="VARCHAR" length="255" decimal="0" jt="12" >
+				<comment><![CDATA[An optional remark made by the teacher about themselves.]]></comment>
+			</column>
+			<index name="PK_TEACHER" unique="PRIMARY_KEY" >
+				<column name="ID" />
+			</index>
+			<fk name="FK_TEACHER_FACULTY" to_schema="INSTANCE" to_table="FACULTY" >
+				<fk_column name="FACULTY" pk="ABBREVIATION" />
+			</fk>
+		</table>
+		<view name="VW_ACTIVE_LECTURER_WORKLOAD" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT t.ID AS TEACHER_ID, t.NAME AS TEACHER_NAME, COALESCE(SUM(c.CREDITED_TEACHER_HOURS), 0) AS WORKLOAD FROM INSTANCE.LECTURER l JOIN INSTANCE.TEACHER t ON t.ID = l.TEACHER_ID LEFT JOIN INSTANCE.COURSE c ON c.TEACHER = t.ID JOIN INSTANCE.SEARCH_CRITERIA sc ON sc.SEMESTER_START = c.COURSE_START WHERE l.IS_ACTIVE = TRUE GROUP BY t.ID, t.NAME]]></view_script>
+			<column name="TEACHER_ID" type="VARCHAR" />
+			<column name="TEACHER_NAME" type="VARCHAR" />
+			<column name="WORKLOAD" type="INTEGER" />
+		</view>
+		<view name="VW_ACTIVE_PROFESSOR_WORKLOAD" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT t.ID AS TEACHER_ID, t.NAME AS TEACHER_NAME, p.CREDIT_HOUR_ACCOUNT, COALESCE(SUM(c.CREDITED_TEACHER_HOURS), 0) AS WORKLOAD FROM INSTANCE.PROFESSOR p JOIN INSTANCE.TEACHER t ON t.ID = p.TEACHER_ID LEFT JOIN INSTANCE.COURSE c ON c.TEACHER = t.ID JOIN INSTANCE.SEARCH_CRITERIA sc ON sc.SEMESTER_START = c.COURSE_START WHERE p.IS_ACTIVE = TRUE GROUP BY t.ID, t.NAME, p.CREDIT_HOUR_ACCOUNT]]></view_script>
+			<column name="TEACHER_ID" type="VARCHAR" />
+			<column name="TEACHER_NAME" type="VARCHAR" />
+			<column name="CREDIT_HOUR_ACCOUNT" type="DECIMAL" />
+			<column name="WORKLOAD" type="INTEGER" />
+		</view>
+		<view name="VW_OFFERED_COURSES" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT sc.SEMESTER_START, s.SUBJECT_NUMBER, s.SUBJECT_NAME, s.PLANNED_STUPO_HOURS, s.PLANNED_SCHEDULE_HOURS, s.SUBJECT_TYPE, t.FACULTY AS EXPORTING_FACULTY, s.FACULTY AS IMPORTING_FACULTY, c.ACTUAL_STUPO_HOURS, c.ACTUAL_SCHEDULE_HOURS, c.CREDITED_TEACHER_HOURS, t.NAME AS TEACHER_NAME, s.REMARK AS SUBJECT_REMARK, t.REMARK AS TEACHER_REMARK FROM INSTANCE.SUBJECT s LEFT JOIN INSTANCE.COURSE c ON c.SUBJECT = s.SUBJECT_NUMBER JOIN INSTANCE.SEARCH_CRITERIA sc ON c.COURSE_START = sc.SEMESTER_START LEFT JOIN INSTANCE.TEACHER t ON t.ID = c.TEACHER]]></view_script>
+			<column name="SEMESTER_START" type="VARCHAR" />
+			<column name="SUBJECT_NUMBER" type="VARCHAR" />
+			<column name="SUBJECT_NAME" type="VARCHAR" />
+			<column name="PLANNED_STUPO_HOURS" type="INTEGER" />
+			<column name="PLANNED_SCHEDULE_HOURS" type="INTEGER" />
+			<column name="SUBJECT_TYPE" type="CHAR" />
+			<column name="EXPORTING_FACULTY" type="VARCHAR" />
+			<column name="IMPORTING_FACULTY" type="VARCHAR" />
+			<column name="ACTUAL_STUPO_HOURS" type="INTEGER" />
+			<column name="ACTUAL_SCHEDULE_HOURS" type="INTEGER" />
+			<column name="CREDITED_TEACHER_HOURS" type="INTEGER" />
+			<column name="TEACHER_NAME" type="VARCHAR" />
+			<column name="SUBJECT_REMARK" type="VARCHAR" />
+			<column name="TEACHER_REMARK" type="VARCHAR" />
+		</view>
+		<view name="VW_OFFERED_SUBJECTS" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT su.SUBJECT_NUMBER, su.SUBJECT_NAME, su.SUBJECT_TYPE, su.REMARK, su.PLANNED_STUPO_HOURS, su.PLANNED_SCHEDULE_HOURS FROM INSTANCE.SUBJECT su]]></view_script>
+			<column name="SUBJECT_NUMBER" type="VARCHAR" />
+			<column name="SUBJECT_NAME" type="VARCHAR" />
+			<column name="SUBJECT_TYPE" type="CHAR" />
+			<column name="REMARK" type="VARCHAR" />
+			<column name="PLANNED_STUPO_HOURS" type="INTEGER" />
+			<column name="PLANNED_SCHEDULE_HOURS" type="INTEGER" />
+		</view>
+		<view name="VW_PROFESSOR_FUNCTION_LOAD" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT t.NAME AS TEACHER_NAME, f.NAME AS FUNCTION_NAME, f.FUNCTION_START, f.LOAD AS FUNCTION_LOAD FROM INSTANCE.FUNCTION_PROFESSOR f JOIN INSTANCE.PROFESSOR p ON p.TEACHER_ID = f.PROFESSOR JOIN INSTANCE.TEACHER t ON t.ID = p.TEACHER_ID JOIN INSTANCE.SEARCH_CRITERIA sc ON f.FUNCTION_START = sc.SEMESTER_START WHERE p.IS_ACTIVE = TRUE]]></view_script>
+			<column name="TEACHER_NAME" type="VARCHAR" />
+			<column name="FUNCTION_NAME" type="VARCHAR" />
+			<column name="FUNCTION_START" type="VARCHAR" />
+			<column name="FUNCTION_LOAD" type="INTEGER" />
+		</view>
+		<view name="VW_SELECTED_COURSE_DETAILS" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT sc.MAJOR, sc.SEMESTER, sc.SEMESTER_START, s.SUBJECT_NUMBER, s.SUBJECT_NAME, s.PLANNED_STUPO_HOURS, s.PLANNED_SCHEDULE_HOURS, s.SUBJECT_TYPE, t.FACULTY AS EXPORTING_FACULTY, s.FACULTY AS IMPORTING_FACULTY, c.ACTUAL_STUPO_HOURS, c.ACTUAL_SCHEDULE_HOURS, c.CREDITED_TEACHER_HOURS, t.NAME AS TEACHER_NAME, s.REMARK AS SUBJECT_REMARK, t.REMARK AS TEACHER_REMARK FROM INSTANCE.SEARCH_CRITERIA sc JOIN INSTANCE.SUBJECT s ON s.MAJOR = sc.MAJOR AND s.SEMESTER = sc.SEMESTER LEFT JOIN INSTANCE.COURSE c ON c.SUBJECT = s.SUBJECT_NUMBER AND c.COURSE_START = sc.SEMESTER_START LEFT JOIN INSTANCE.TEACHER t ON t.ID = c.TEACHER]]></view_script>
+			<column name="MAJOR" type="VARCHAR" />
+			<column name="SEMESTER" type="INTEGER" />
+			<column name="SEMESTER_START" type="VARCHAR" />
+			<column name="SUBJECT_NUMBER" type="VARCHAR" />
+			<column name="SUBJECT_NAME" type="VARCHAR" />
+			<column name="PLANNED_STUPO_HOURS" type="INTEGER" />
+			<column name="PLANNED_SCHEDULE_HOURS" type="INTEGER" />
+			<column name="SUBJECT_TYPE" type="CHAR" />
+			<column name="EXPORTING_FACULTY" type="VARCHAR" />
+			<column name="IMPORTING_FACULTY" type="VARCHAR" />
+			<column name="ACTUAL_STUPO_HOURS" type="INTEGER" />
+			<column name="ACTUAL_SCHEDULE_HOURS" type="INTEGER" />
+			<column name="CREDITED_TEACHER_HOURS" type="INTEGER" />
+			<column name="TEACHER_NAME" type="VARCHAR" />
+			<column name="SUBJECT_REMARK" type="VARCHAR" />
+			<column name="TEACHER_REMARK" type="VARCHAR" />
+		</view>
+		<view name="VW_SELECTED_SERVICE_DETAILS" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT sc.SEMESTER_START, s.SUBJECT_NUMBER, s.SUBJECT_NAME, s.PLANNED_STUPO_HOURS, s.PLANNED_SCHEDULE_HOURS, s.SUBJECT_TYPE, t.FACULTY AS EXPORTING_FACULTY, s.FACULTY AS IMPORTING_FACULTY, c.ACTUAL_STUPO_HOURS, c.ACTUAL_SCHEDULE_HOURS, c.CREDITED_TEACHER_HOURS, t.NAME AS TEACHER_NAME, s.REMARK AS SUBJECT_REMARK, t.REMARK AS TEACHER_REMARK FROM INSTANCE.SUBJECT s LEFT JOIN INSTANCE.COURSE c ON c.SUBJECT = s.SUBJECT_NUMBER JOIN INSTANCE.SEARCH_CRITERIA sc ON c.COURSE_START = sc.SEMESTER_START LEFT JOIN INSTANCE.TEACHER t ON t.ID = c.TEACHER WHERE t.FACULTY != s.FACULTY]]></view_script>
+			<column name="SEMESTER_START" type="VARCHAR" />
+			<column name="SUBJECT_NUMBER" type="VARCHAR" />
+			<column name="SUBJECT_NAME" type="VARCHAR" />
+			<column name="PLANNED_STUPO_HOURS" type="INTEGER" />
+			<column name="PLANNED_SCHEDULE_HOURS" type="INTEGER" />
+			<column name="SUBJECT_TYPE" type="CHAR" />
+			<column name="EXPORTING_FACULTY" type="VARCHAR" />
+			<column name="IMPORTING_FACULTY" type="VARCHAR" />
+			<column name="ACTUAL_STUPO_HOURS" type="INTEGER" />
+			<column name="ACTUAL_SCHEDULE_HOURS" type="INTEGER" />
+			<column name="CREDITED_TEACHER_HOURS" type="INTEGER" />
+			<column name="TEACHER_NAME" type="VARCHAR" />
+			<column name="SUBJECT_REMARK" type="VARCHAR" />
+			<column name="TEACHER_REMARK" type="VARCHAR" />
+		</view>
+		<view name="VW_SELECTED_SUBJECT_DETAILS" >
+			<view_script><![CDATA[CREATE OR REPLACE VIEW ${nameWithSchemaName} AS SELECT su.SUBJECT_NUMBER, su.SUBJECT_NAME, su.SUBJECT_TYPE, su.PLANNED_STUPO_HOURS, su.PLANNED_SCHEDULE_HOURS, su.SEMESTER, su.MAJOR AS SUBJECT_MAJOR, su.FACULTY AS SUBJECT_FACULTY, su.REMARK, fa.NAME AS FACULTY_NAME, ma.NAME AS MAJOR_NAME FROM INSTANCE.SUBJECT su INNER JOIN INSTANCE.FACULTY fa ON fa.ABBREVIATION = su.FACULTY INNER JOIN INSTANCE.MAJOR ma ON ma.ABBREVIATION = su.MAJOR INNER JOIN INSTANCE.SEARCH_CRITERIA sc ON sc.MAJOR = su.MAJOR  -- Join mit SEARCH_CRITERIA]]></view_script>
+			<column name="SUBJECT_NUMBER" type="VARCHAR" />
+			<column name="SUBJECT_NAME" type="VARCHAR" />
+			<column name="SUBJECT_TYPE" type="CHAR" />
+			<column name="PLANNED_STUPO_HOURS" type="INTEGER" />
+			<column name="PLANNED_SCHEDULE_HOURS" type="INTEGER" />
+			<column name="SEMESTER" type="INTEGER" />
+			<column name="SUBJECT_MAJOR" type="VARCHAR" />
+			<column name="SUBJECT_FACULTY" type="VARCHAR" />
+			<column name="REMARK" type="VARCHAR" />
+			<column name="FACULTY_NAME" type="VARCHAR" />
+			<column name="MAJOR_NAME" type="VARCHAR" />
+		</view>
+		<procedure name="SP_UPDATE_CREDIT_HOUR_ACCOUNT" id="Procedure-5f8" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE PROCEDURE INSTANCE.SP_UPDATE_CREDIT_HOUR_ACCOUNT(
+    IN semester_start VARCHAR(10)
+)
+LANGUAGE SQL
+BEGIN
+    DECLARE total_credited_teacher_hours INT DEFAULT 0;
+    DECLARE function_load INT DEFAULT 0;
+    DECLARE v_teacher_id VARCHAR(15);
+    DECLARE done INT DEFAULT 0;
+    -- go through all active professors
+    DECLARE cur CURSOR FOR
+        SELECT teacher_id
+        FROM INSTANCE.PROFESSOR
+        WHERE is_active = TRUE;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    OPEN cur;
+    FETCH cur INTO v_teacher_id;
+    -- loop through 
+    WHILE done = 0 DO
+        SET total_credited_teacher_hours = 0;
+        SET function_load = 0;
+        -- calculate credited teacher hours
+        SELECT COALESCE(SUM(credited_teacher_hours), 0)
+        INTO total_credited_teacher_hours
+        FROM INSTANCE.COURSE
+        WHERE teacher = v_teacher_id
+          AND course_start = semester_start;
+        -- calculate function load from FUNCTION_PROFESSOR
+        SELECT COALESCE(SUM(load), 0)
+        INTO function_load
+        FROM INSTANCE.FUNCTION_PROFESSOR
+        WHERE PROFESSOR = v_teacher_id
+          AND FUNCTION_START = semester_start;
+        -- add function load to the credited teacher hours
+        SET total_credited_teacher_hours = total_credited_teacher_hours + function_load;
+        -- subtract compulsory hours (18) from the total
+        SET total_credited_teacher_hours = total_credited_teacher_hours - 18;
+        -- update credit hour account
+        UPDATE INSTANCE.PROFESSOR
+        SET credit_hour_account = credit_hour_account + total_credited_teacher_hours
+        WHERE teacher_id = v_teacher_id;
+        FETCH cur INTO v_teacher_id;
+    END WHILE;
+    CLOSE cur;
+END]]></string>
+		</procedure>
+		<function name="F_MISSING_COURSES_CHECK" id="Function-a61" isSystem="false" params_known="n" >
+			<string><![CDATA[CREATE OR REPLACE FUNCTION INSTANCE.F_MISSING_COURSES_CHECK(
+    v_MAJOR VARCHAR(5),
+    v_SEMESTER INTEGER
+)
+RETURNS INTEGER
+LANGUAGE SQL
+BEGIN
+    DECLARE course_count INTEGER;
+    -- Select the count of matching courses
+    SELECT COUNT(*) 
+    INTO course_count
+    FROM INSTANCE.COURSE
+    INNER JOIN INSTANCE.SUBJECT SU
+        ON INSTANCE.COURSE.SUBJECT = SU.SUBJECT_NUMBER
+    INNER JOIN INSTANCE.SEARCH_CRITERIA SC
+        ON INSTANCE.COURSE.COURSE_START = SC.SEMESTER_START
+    WHERE SU.MAJOR = v_MAJOR AND SU.SEMESTER = v_SEMESTER;
+     -- Conditional logic for returning a message
+    IF course_count > 0 THEN
+        RETURN 0;  -- Or another success code
+    ELSE
+        RETURN -1;  -- Or another failure code
+    END IF;
+END]]></string>
+		</function>
+		<trigger name="TR_CHECK_EXISTING_LECTURER" table="PROFESSOR" id="Trigger-1489" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE TRIGGER ${nameWithSchemaName}
+BEFORE INSERT ON instance.professor
+REFERENCING NEW AS NEW_ROW
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM instance.lecturer WHERE teacher_id = NEW_ROW.teacher_id) THEN
+        SIGNAL SQLSTATE '45000';
+    END IF;
+END]]></string>
+		</trigger>
+		<trigger name="TR_CHECK_EXISTING_PROFESSOR" table="LECTURER" id="Trigger-19ad" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE TRIGGER ${nameWithSchemaName}
+BEFORE INSERT ON instance.lecturer
+REFERENCING NEW AS NEW_ROW
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM instance.professor WHERE teacher_id = NEW_ROW.teacher_id) THEN
+        SIGNAL SQLSTATE '45000';
+    END IF;
+END]]></string>
+		</trigger>
+		<trigger name="TR_INSERT_COURSE" table="COURSE" id="Trigger-24d6" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE TRIGGER ${nameWithSchemaName}
+BEFORE INSERT ON INSTANCE.COURSE
+REFERENCING NEW AS NEW_ROW
+FOR EACH ROW
+BEGIN
+    DECLARE is_active BOOLEAN DEFAULT FALSE;
+    -- is prof active?
+    SELECT IS_ACTIVE INTO is_active
+    FROM INSTANCE.PROFESSOR
+    WHERE TEACHER_ID = NEW_ROW.TEACHER;
+    -- if prof inactive / not found, check the lecturer table
+    IF is_active = FALSE THEN
+        SELECT IS_ACTIVE INTO is_active
+        FROM INSTANCE.LECTURER
+        WHERE TEACHER_ID = NEW_ROW.TEACHER;
+    END IF;
+    --if inactive for both
+    IF is_active = FALSE THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot insert course for inactive professor or lecturer';
+    END IF;
+END]]></string>
+		</trigger>
+		<trigger name="TR_UPDATE_CREDIT_HOUR_ACCOUNT" table="SEARCH_CRITERIA" id="Trigger-b41" isSystem="false" >
+			<string><![CDATA[CREATE OR REPLACE TRIGGER ${nameWithSchemaName}
+AFTER UPDATE OF semester_start ON INSTANCE.SEARCH_CRITERIA
+REFERENCING OLD AS OLD_ROW NEW AS NEW_ROW
+FOR EACH ROW
+BEGIN
+    -- Only if there is a difference
+    IF OLD_ROW.semester_start <> NEW_ROW.semester_start THEN
+        -- Call stored procedure with the new semester_start value
+        CALL INSTANCE.SP_UPDATE_CREDIT_HOUR_ACCOUNT(NEW_ROW.semester_start);
+    END IF;
+END]]></string>
+		</trigger>
+	</schema>
+	<layout name="Main Layout" id="Layout-1ebf" show_relation="columns" >
+		<comment><![CDATA[Main Layout]]></comment>
+		<entity schema="INSTANCE" name="COURSE" color="C7F4BE" x="357" y="663" />
+		<entity schema="INSTANCE" name="FACULTY" color="C7F4BE" x="680" y="340" />
+		<entity schema="INSTANCE" name="FUNCTION_PROFESSOR" color="C7F4BE" x="51" y="272" />
+		<entity schema="INSTANCE" name="LECTURER" color="C7F4BE" x="459" y="85" />
+		<entity schema="INSTANCE" name="MAJOR" color="C7F4BE" x="901" y="340" />
+		<entity schema="INSTANCE" name="PROFESSOR" color="C7F4BE" x="221" y="85" />
+		<entity schema="INSTANCE" name="SEARCH_CRITERIA" color="C7F4BE" x="51" y="527" />
+		<entity schema="INSTANCE" name="SUBJECT" color="C7F4BE" x="748" y="646" />
+		<entity schema="INSTANCE" name="TEACHER" color="C7F4BE" x="408" y="340" />
+		<entity schema="INSTANCE" name="VW_ACTIVE_LECTURER_WORKLOAD" color="BED3F4" x="1513" y="850" />
+		<entity schema="INSTANCE" name="VW_ACTIVE_PROFESSOR_WORKLOAD" color="BED3F4" x="1122" y="850" />
+		<entity schema="INSTANCE" name="VW_OFFERED_COURSES" color="BED3F4" x="1496" y="85" />
+		<entity schema="INSTANCE" name="VW_OFFERED_SUBJECTS" color="BED3F4" x="1156" y="85" />
+		<entity schema="INSTANCE" name="VW_PROFESSOR_FUNCTION_LOAD" color="BED3F4" x="1122" y="1020" />
+		<entity schema="INSTANCE" name="VW_SELECTED_COURSE_DETAILS" color="BED3F4" x="1496" y="442" />
+		<entity schema="INSTANCE" name="VW_SELECTED_SERVICE_DETAILS" color="BED3F4" x="1870" y="442" />
+		<entity schema="INSTANCE" name="VW_SELECTED_SUBJECT_DETAILS" color="BED3F4" x="1139" y="442" />
+		<group name="VIEWS" color="ECF0F7" >
+			<entity schema="INSTANCE" name="VW_OFFERED_SUBJECTS" />
+			<entity schema="INSTANCE" name="VW_OFFERED_COURSES" />
+			<entity schema="INSTANCE" name="VW_SELECTED_SUBJECT_DETAILS" />
+			<entity schema="INSTANCE" name="VW_SELECTED_COURSE_DETAILS" />
+			<entity schema="INSTANCE" name="VW_ACTIVE_PROFESSOR_WORKLOAD" />
+			<entity schema="INSTANCE" name="VW_SELECTED_SERVICE_DETAILS" />
+			<entity schema="INSTANCE" name="VW_ACTIVE_LECTURER_WORKLOAD" />
+			<entity schema="INSTANCE" name="VW_PROFESSOR_FUNCTION_LOAD" />
+		</group>
+		<group name="MAIN LAYOUT" color="EEF7EC" >
+			<entity schema="INSTANCE" name="FUNCTION_PROFESSOR" />
+			<entity schema="INSTANCE" name="TEACHER" />
+			<entity schema="INSTANCE" name="FACULTY" />
+			<entity schema="INSTANCE" name="SUBJECT" />
+			<entity schema="INSTANCE" name="MAJOR" />
+			<entity schema="INSTANCE" name="SEARCH_CRITERIA" />
+			<entity schema="INSTANCE" name="COURSE" />
+			<entity schema="INSTANCE" name="PROFESSOR" />
+			<entity schema="INSTANCE" name="LECTURER" />
+		</group>
+		<script name="SQL_Editor" id="Editor-6b8" language="SQL" >
+			<string><![CDATA[-- Trigger für COURSE Tabelle
+CREATE OR REPLACE TRIGGER INSTANCE.TR_INSERT_COURSE
+BEFORE INSERT ON INSTANCE.COURSE
+REFERENCING NEW AS NEW_ROW
+FOR EACH ROW
+BEGIN
+    DECLARE is_active BOOLEAN DEFAULT FALSE;
+
+    -- is prof active?
+    SELECT IS_ACTIVE INTO is_active
+    FROM INSTANCE.PROFESSOR
+    WHERE TEACHER_ID = NEW_ROW.TEACHER;
+
+    -- if prof inactive / not found, check the lecturer table
+    IF is_active = FALSE THEN
+        SELECT IS_ACTIVE INTO is_active
+        FROM INSTANCE.LECTURER
+        WHERE TEACHER_ID = NEW_ROW.TEACHER;
+    END IF;
+
+    --if inactive for both
+    IF is_active = FALSE THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot insert course for inactive professor or lecturer';
+    END IF;
+END;
+]]></string>
+		</script>
+	</layout>
+	<layout name="~Layout with Sample Tools" id="Layout-d59" show_column_type="y" show_relation="columns" >
+		<entity schema="INSTANCE" name="COURSE" color="C7F4BE" x="1428" y="255" />
+		<entity schema="INSTANCE" name="FACULTY" color="C7F4BE" x="680" y="255" />
+		<entity schema="INSTANCE" name="FUNCTION_PROFESSOR" color="C7F4BE" x="782" y="680" />
+		<entity schema="INSTANCE" name="LECTURER" color="C7F4BE" x="51" y="476" />
+		<entity schema="INSTANCE" name="MAJOR" color="C7F4BE" x="340" y="51" />
+		<entity schema="INSTANCE" name="PROFESSOR" color="C7F4BE" x="374" y="476" />
+		<entity schema="INSTANCE" name="SEARCH_CRITERIA" color="BED3F4" x="2686" y="272" />
+		<entity schema="INSTANCE" name="SUBJECT" color="C7F4BE" x="1020" y="255" />
+		<entity schema="INSTANCE" name="TEACHER" color="C7F4BE" x="374" y="255" />
+		<entity schema="INSTANCE" name="VW_ACTIVE_LECTURER_WORKLOAD" color="BED3F4" x="3060" y="272" />
+		<entity schema="INSTANCE" name="VW_ACTIVE_PROFESSOR_WORKLOAD" color="BED3F4" x="3468" y="272" />
+		<entity schema="INSTANCE" name="VW_OFFERED_COURSES" color="BED3F4" x="3060" y="476" />
+		<entity schema="INSTANCE" name="VW_OFFERED_SUBJECTS" color="BED3F4" x="3468" y="612" />
+		<entity schema="INSTANCE" name="VW_PROFESSOR_FUNCTION_LOAD" color="BED3F4" x="2652" y="476" />
+		<entity schema="INSTANCE" name="VW_SELECTED_COURSE_DETAILS" color="BED3F4" x="2278" y="51" />
+		<entity schema="INSTANCE" name="VW_SELECTED_SERVICE_DETAILS" color="BED3F4" x="1870" y="476" />
+		<entity schema="INSTANCE" name="VW_SELECTED_SUBJECT_DETAILS" color="BED3F4" x="2278" y="867" />
+		<script name="SQL Editor" id="Editor-1407" language="SQL" >
+			<string><![CDATA[SELECT
+	ID, NAME, FACULTY, REMARK
+FROM
+	INSTANCE.TEACHER R;]]></string>
+		</script>
+		<browser id="Browse-261a" name="Relational Data Editor" confirm_updates="y" >
+			<browse_table schema="INSTANCE" entity="TEACHER" x="20" y="20" width="270" height="-60" >
+				<browse_table schema="INSTANCE" entity="LECTURER" fk="FK_LECTURER_TEACHER" x="310" y="20" width="500" height="350" />
+			</browse_table>
+		</browser>
+		<query id="Query-2098" name="Query Builder" >
+			<query_table schema="INSTANCE" name="TEACHER" alias="t" x="51" y="51" >
+				<column name="ID" />
+				<column name="NAME" />
+				<column name="FACULTY" />
+				<column name="REMARK" />
+				<query_table schema="INSTANCE" name="LECTURER" alias="l" x="255" y="51" fk="FK_LECTURER_TEACHER" type="Inner Join" >
+					<column name="TEACHER_ID" />
+					<column name="ADDRESS" />
+					<column name="IS_ACTIVE" />
+				</query_table>
+			</query_table>
+		</query>
+	</layout>
+</project>
